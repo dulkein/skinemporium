@@ -1,0 +1,60 @@
+<?php
+
+return [
+    'listings' => [
+        [
+            'id' => 1,
+            'name' => 'AK-47 | Redline',
+            'condition' => 'Field-Tested',
+            'price_usd' => 18.50,
+            'float' => 0.22,
+            'image' => 'https://images.steamusercontent.com/ugc/2020472588358155294/1EF6DC65B53F8AA0D861A1E896A0C497A6D341D4/',
+            'seller' => 'LongGamer',
+        ],
+        [
+            'id' => 2,
+            'name' => 'M4A1-S | Decimator',
+            'condition' => 'Minimal Wear',
+            'price_usd' => 26.00,
+            'float' => 0.08,
+            'image' => 'https://images.steamusercontent.com/ugc/2041867101573049155/90E5C6868A2624A1228CDDF0A2E5E57B7D0D1884/',
+            'seller' => 'SkinSniper',
+        ],
+        [
+            'id' => 3,
+            'name' => 'AWP | Asiimov',
+            'condition' => 'Battle-Scarred',
+            'price_usd' => 67.90,
+            'float' => 0.56,
+            'image' => 'https://images.steamusercontent.com/ugc/2050879470980480425/DB1F802AF4A89E8B19B0D858C058A8EDE4B80F45/',
+            'seller' => 'FloatHunter',
+        ],
+        [
+            'id' => 4,
+            'name' => 'USP-S | Cortex',
+            'condition' => 'Factory New',
+            'price_usd' => 11.20,
+            'float' => 0.03,
+            'image' => 'https://images.steamusercontent.com/ugc/2055372900747245524/7D34787EF354A0404B6F3A2C0EDB0BA85D428F75/',
+            'seller' => 'PixelTrade',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Glock-18 | Vogue',
+            'condition' => 'Well-Worn',
+            'price_usd' => 4.75,
+            'float' => 0.39,
+            'image' => 'https://images.steamusercontent.com/ugc/2459618719101899325/8402FBF52E0CA55B5A003A1AFEC3EEC94C6D54AD/',
+            'seller' => 'AimAndSell',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Desert Eagle | Printstream',
+            'condition' => 'Minimal Wear',
+            'price_usd' => 54.00,
+            'float' => 0.10,
+            'image' => 'https://images.steamusercontent.com/ugc/1973168612835444779/EF4C9AE57CCB0E5D7788B48983B8AC73BDB4FEC8/',
+            'seller' => 'Dust2Dealer',
+        ],
+    ],
+];
