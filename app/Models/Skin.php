@@ -14,6 +14,7 @@ class Skin extends Model
         'market_hash_name',
         'weapon_name',
         'skin_name',
+        'market_category',
         'rarity',
         'image_url',
         'external_item_id',

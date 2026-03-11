@@ -41,3 +41,17 @@ php artisan market:import-csfloat --pages=5 --limit=50
 ## 6) Current scope
 - Importer focuses on listing + item data into local DB.
 - Advanced marketplace logic (escrow, bot trading, pattern index, full purchase sync) is not included yet.
+
+## 7) Category tabs support (Rifles/Pistols/SMGs/Heavy/Knives/Gloves)
+- Market page now supports category + weapon sub-tabs similar to CSFloat's basic flow.
+- Categories are inferred from item def-index and weapon names.
+- After updating code, run migrations and import again so `skins.market_category` gets filled:
+
+```bash
+php artisan migrate
+php artisan market:import-csfloat --pages=2 --limit=50
+php artisan market:reclassify-skins
+php artisan optimize:clear
+```
+
+- `market:reclassify-skins` is safe to run anytime after new imports and fixes bad category assignments (like stickers ending up in rifles).

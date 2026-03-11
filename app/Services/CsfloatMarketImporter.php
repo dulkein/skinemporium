@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Listing;
 use App\Models\Skin;
+use App\Support\CsMarketTaxonomy;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -96,17 +97,20 @@ class CsfloatMarketImporter
             return 'skipped';
         }
 
-        [$weaponName, $skinName] = $this->splitSkinName($marketHashName);
+        $weaponName = $this->resolveWeaponName($record, $marketHashName);
+        $skinName = $this->resolveSkinName($marketHashName);
+        $defIndex = is_numeric(Arr::get($item, 'def_index'))
+            ? (int) Arr::get($item, 'def_index')
+            : null;
+        $marketCategory = CsMarketTaxonomy::categoryFromItem($marketHashName, $weaponName, $defIndex);
 
         $skin = Skin::updateOrCreate(
             ['market_hash_name' => $marketHashName],
             [
                 'weapon_name' => $weaponName,
                 'skin_name' => $skinName,
-                'rarity' => $this->firstString([
-                    Arr::get($item, 'rarity'),
-                    Arr::get($record, 'rarity'),
-                ]),
+                'market_category' => $marketCategory,
+                'rarity' => $this->resolveRarity($record),
                 'image_url' => $this->resolveImageUrl($record),
                 'external_item_id' => $this->firstString([
                     Arr::get($item, 'id'),
@@ -132,11 +136,7 @@ class CsfloatMarketImporter
             'source' => 'csfloat',
             'seller_id' => null,
             'skin_id' => $skin->id,
-            'condition' => $this->firstString([
-                Arr::get($item, 'exterior'),
-                Arr::get($record, 'condition'),
-                Arr::get($record, 'wear_name'),
-            ]),
+            'condition' => $this->resolveCondition($record, $marketHashName),
             'float_value' => $this->resolveFloatValue($record),
             'price_usd' => $priceUsd,
             'inspect_link' => $this->firstString([
@@ -166,14 +166,52 @@ class CsfloatMarketImporter
         return 'imported';
     }
 
-    private function splitSkinName(string $marketHashName): array
+    private function resolveWeaponName(array $record, string $marketHashName): ?string
     {
-        $parts = explode(' | ', $marketHashName, 2);
+        $item = (array) Arr::get($record, 'item', []);
 
-        return [
-            $parts[0] ?? null,
-            $parts[1] ?? null,
-        ];
+        return CsMarketTaxonomy::normalizeWeaponName($this->firstString([
+            Arr::get($item, 'weapon'),
+            Arr::get($item, 'weapon_name'),
+            CsMarketTaxonomy::weaponFromMarketHashName($marketHashName),
+        ]));
+    }
+
+    private function resolveSkinName(string $marketHashName): ?string
+    {
+        $withoutWear = preg_replace('/\s*\(([^()]*)\)\s*$/', '', trim($marketHashName));
+        $parts = explode(' | ', (string) $withoutWear, 2);
+
+        return isset($parts[1]) ? trim($parts[1]) : null;
+    }
+
+    private function resolveCondition(array $record, string $marketHashName): ?string
+    {
+        $item = (array) Arr::get($record, 'item', []);
+
+        $raw = $this->firstString([
+            Arr::get($item, 'exterior'),
+            Arr::get($item, 'wear_name'),
+            Arr::get($record, 'condition'),
+            Arr::get($record, 'wear_name'),
+            $this->extractWearFromMarketName($marketHashName),
+        ]);
+
+        return $this->normalizeCondition($raw);
+    }
+
+    private function resolveRarity(array $record): ?string
+    {
+        $item = (array) Arr::get($record, 'item', []);
+
+        $raw = $this->firstString([
+            Arr::get($item, 'rarity_name'),
+            Arr::get($item, 'rarity'),
+            Arr::get($record, 'rarity_name'),
+            Arr::get($record, 'rarity'),
+        ]);
+
+        return $this->normalizeRarity($raw);
     }
 
     private function resolveImageUrl(array $record): ?string
@@ -276,6 +314,60 @@ class CsfloatMarketImporter
     private function makeSyntheticExternalId(string $marketHashName, array $record): string
     {
         return 'synth_'.md5($marketHashName.'|'.json_encode($record));
+    }
+
+    private function extractWearFromMarketName(string $marketHashName): ?string
+    {
+        if (preg_match('/\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)\s*$/i', $marketHashName, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    private function normalizeCondition(?string $condition): ?string
+    {
+        if (! is_string($condition)) {
+            return null;
+        }
+
+        $value = trim($condition);
+        if ($value === '') {
+            return null;
+        }
+
+        $normalized = strtolower(str_replace(['_', '-'], [' ', '-'], $value));
+
+        return match ($normalized) {
+            'fn', 'factory new' => 'Factory New',
+            'mw', 'minimal wear' => 'Minimal Wear',
+            'ft', 'field-tested', 'field tested' => 'Field-Tested',
+            'ww', 'well-worn', 'well worn' => 'Well-Worn',
+            'bs', 'battle-scarred', 'battle scarred' => 'Battle-Scarred',
+            'unknown', 'n/a', 'na', '-' => null,
+            default => $value,
+        };
+    }
+
+    private function normalizeRarity(?string $rarity): ?string
+    {
+        if (! is_string($rarity)) {
+            return null;
+        }
+
+        $value = trim($rarity);
+        if ($value === '' || is_numeric($value)) {
+            return null;
+        }
+
+        $normalized = strtolower(str_replace(['_', '-'], ' ', $value));
+        $normalized = preg_replace('/\s+/', ' ', (string) $normalized);
+
+        if (in_array($normalized, ['unknown', 'n/a', 'na', '-'], true)) {
+            return null;
+        }
+
+        return ucwords((string) $normalized);
     }
 
     private function normalizeStatus(?string $status): string
