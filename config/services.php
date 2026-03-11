@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'csfloat' => [
+        'base_url' => env('CSFLOAT_BASE_URL', 'https://csfloat.com/api/v1'),
+        'api_key' => env('CSFLOAT_API_KEY'),
+        'listings_path' => env('CSFLOAT_LISTINGS_PATH', '/listings'),
+    ],
+
+    'steam' => [
+        'web_api_key' => env('STEAM_WEB_API_KEY'),
+        'openid_realm' => env('STEAM_OPENID_REALM', env('APP_URL')),
+        'openid_return_to' => env('STEAM_OPENID_RETURN_TO', env('APP_URL').'/auth/steam/callback'),
+    ],
+
 ];
