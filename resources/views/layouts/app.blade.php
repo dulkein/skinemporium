@@ -17,9 +17,9 @@
         <div class="container nav-wrap">
             <a class="brand" href="{{ route('home') }}">SkinEmporium</a>
             <nav class="site-nav">
-                <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('market.index') }}">Market</a>
-                <a href="{{ route('sell.create') }}">Sell</a>
+                <a class="{{ request()->routeIs('home') ? 'is-active' : '' }}" href="{{ route('home') }}">Home</a>
+                <a class="{{ request()->routeIs('market.*') ? 'is-active' : '' }}" href="{{ route('market.index') }}">Market</a>
+                <a class="{{ request()->routeIs('sell.*') ? 'is-active' : '' }}" href="{{ route('sell.create') }}">Sell</a>
             </nav>
         </div>
     </header>

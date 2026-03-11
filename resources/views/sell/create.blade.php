@@ -1,10 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<section>
-    <h1>Sell Your Skin</h1>
-    <p>Submit your item info. This basic version only validates and shows a confirmation.</p>
+<section class="page-hero">
+    <p class="eyebrow">SELL PORTAL</p>
+    <h1>Create a new skin listing</h1>
+    <p class="hero-copy">Fill in basic item data and submit. This MVP validates input and shows a confirmation.</p>
+</section>
 
+<section class="form-panel">
     <form class="form" method="POST" action="{{ route('sell.store') }}">
         @csrf
 
@@ -38,7 +41,10 @@
             <p class="error">{{ $message }}</p>
         @enderror
 
-        <button class="button" type="submit">Submit listing</button>
+        <div class="hero-actions">
+            <button class="button button-primary" type="submit">Submit listing</button>
+            <a class="button button-outline" href="{{ route('market.index') }}">View market</a>
+        </div>
     </form>
 </section>
 @endsection
