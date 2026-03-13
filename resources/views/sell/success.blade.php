@@ -9,10 +9,21 @@
 
 <section class="summary-panel">
     <div class="summary-box">
+        @if (! empty($listing['image_url']))
+            <img src="{{ $listing['image_url'] }}" alt="{{ $listing['item_name'] }}">
+        @endif
         <p><strong>Item:</strong> {{ $listing['item_name'] }}</p>
-        <p><strong>Condition:</strong> {{ $listing['wear'] }}</p>
-        <p><strong>Float:</strong> {{ number_format((float) $listing['float_value'], 2) }}</p>
+        @if (! empty($listing['weapon']))
+            <p><strong>Weapon:</strong> {{ $listing['weapon'] }}</p>
+        @endif
+        @if (! empty($listing['category']))
+            <p><strong>Category:</strong> {{ $listing['category'] }}</p>
+        @endif
+        <p><strong>Condition:</strong> {{ $listing['condition'] ?? 'Unknown' }}</p>
         <p><strong>Price:</strong> ${{ number_format((float) $listing['price_usd'], 2) }}</p>
+        @if (! empty($listing['listing_id']))
+            <p><strong>Listing ID:</strong> #{{ $listing['listing_id'] }}</p>
+        @endif
     </div>
 
     <div class="hero-actions">
